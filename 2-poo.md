@@ -57,3 +57,76 @@ public class Car {
  } 
 } 
 ```
+
+```java
+public class Store{
+  public String productType;
+  public Store(String product){
+    productType = product;
+  }
+}
+```
+
+## Classes: Assigning Values to Instance Fields
+
+Since the constructor now accepts a parameter, let’s see how we can use this constructor to create an instance of an object with initial values for its fields.
+
+```java
+public class Car { 
+  public String color; 
+
+  public Car(String carColor) { 
+    // assign parameter value to instance field 
+    color = carColor; 
+  } 
+} 
+
+class Main{ 
+  public static void main(String[] args){ 
+  Car ferrari = new Car("red"); 
+  } 
+}  
+```
+
+## Classes: Multiple Fields
+
+Objects are not limited to a single instance field. We can declare as many fields as necessary for our program’s requirements. To illustrate this, let’s add two more instance fields to our Car instances.
+
+Remember, it’s important to pass the arguments in the same order as they are listed in the parameters.
+
+```java
+public class Car { 
+  String color; 
+
+  // new fields! 
+  boolean isRunning; 
+  int velocity; 
+
+  // new parameters that correspond to the new fields 
+  public Car(String carColor, boolean carRunning, int milesPerHour) { 
+    color = carColor; 
+
+    // assign new parameters to the new fields 
+    isRunning = carRunning; 
+    velocity = milesPerHour; 
+  } 
+} 
+
+Public class Main(){ 
+
+  public static void main(String[] args) { 
+    // new values passed into the method call 
+    Car ferrari = new Car("red", true, 27); 
+    Car renault = new Car("blue", false, 70); 
+
+    System.out.println(renault.isRunning); // false 
+    System.out.println(ferrari.velocity); // 27 
+  } 
+} 
+
+// values match types, no error 
+Car honda = new Car("green", false, 0); 
+
+// values do not match types, error! 
+Car junker = new Car(true, 42, "brown"); 
+```
