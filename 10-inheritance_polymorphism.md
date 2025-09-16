@@ -1,0 +1,611 @@
+## Inheritance in Practice
+
+So how do we define a child class so that it inherits from a parent class? We use the keyword `extends` like this:
+
+```java
+class Shape {
+
+  // Shape class members
+
+}
+
+class Triangle extends Shape {
+
+  // additional Triangle class members
+
+}
+```
+
+Now `Triangle` has inherited traits from `Shape`, meaning it copied over class members from `Shape`. When we use `inheritance` to extend a subclass from a superclass, we create an “is-a” relationship from the subclass to the superclass. For example, an object of `Triangle` is a member of the `Shape` class; however, an object of `Shape` is not necessarily an object of `Triangle`.
+
+Until now, we’ve only been working with one class and one file. However, most Java programs utilize multiple `classes`,  each of which requires its own file. Only one file needs a `main()` method — this is the file we will run.
+
+Note: the various classes in our Java package — even though they are in different `files` — will have access to each other, so we can instantiate one class inside of another.
+
+```java
+Noodle.java
+class Noodle {
+  double lengthInCentimeters;
+  String shape;
+  String texture = "brittle";
+  
+  public void cook() {
+    
+    this.texture = "cooked";
+    
+  }
+}
+
+Spaghetti.java
+class Spaghetti extends Noodle {
+  
+}
+
+Main.java
+public class Main{
+  public static void main(String[] args) {
+     Spaghetti spaghettiPomodoro = new Spaghetti();
+     System.out.println(spaghettiPomodoro.texture);
+  }
+}
+
+Output:
+brittle
+```
+
+## Inheriting the Constructor
+
+Hang on, you might be thinking, if the child class inherits its parent’s fields and `methods`, does it also inherit the constructor? Let’s take a look at how the `super()` constructor works!
+
+Let’s say `Shape` has a `numSides` field that is set by passing an integer into the constructor. If we’re instantiating a `Triangle`, we would want that number to always be `3`, so we’d want to modify the constructor to automatically assign `numSides` with a value of `3`.
+
+Can we do that?
+
+As it happens, Java has a trick up its sleeve for just this occasion: using the `super()` method which acts like the parent constructor inside the child class constructor:
+
+```java
+class Triangle extends Shape {
+
+  Triangle() {
+    super(3);
+  }
+
+  // additional Triangle class members
+
+}
+```
+
+By passing `3` to `super()`, we are making it possible to instantiate a `Triangle` without passing in a value for `numSides`.
+
+Meanwhile, `super(3)` (behaving as `Shape(3)`) will shoulder the responsibility of setting `numSides` to `3` for our `Triangle` object. It’s like we called `Shape(3)`.
+
+It is also possible to write a constructor without making a call to any `super()` constructor:
+
+```java
+class Triangle extends Shape {
+
+  Triangle() {
+    this.numSides = 3;
+  }
+
+  // additional Triangle class methods
+
+}
+```
+
+In this situation, Java secretly calls the parent class’ no-argument constructor (`super()`). So in this specific example, the `Triangle()` constructor first calls the `Shape()` constructor. That `Shape()` takes care of whatever business it needs to take care of. And then after that is complete, we go in and set `this.numSides` to `3`.
+
+If you’re writing a constructor of a child class, and don’t explicitly make a call to a constructor from a parent class using `super`, it’s important to remember that Java will automatically (and secretly) call `super()` as the first line of your child class constructor.
+
+```java
+Noodle.java
+class Noodle {
+  double lengthInCentimeters;
+  double widthInCentimeters;
+  String shape;
+  String ingredients;
+  String texture = "brittle";
+    
+  Noodle(double lenInCent, double wthInCent, String shp, String ingr) {
+      
+    this.lengthInCentimeters = lenInCent;
+    this.widthInCentimeters = wthInCent;
+    this.shape = shp;
+    this.ingredients = ingr;
+      
+  }
+    
+  public void cook() {
+    this.texture = "cooked";
+  }
+    
+}
+
+Pho.java
+class Pho extends Noodle {
+
+  public Pho(){
+    super(30.0, 0.64, "flat", "rice flour");
+  }
+  
+}
+
+Main.java
+public class Main{
+  public static void main(String[] args) {
+      Pho phoChay = new Pho();
+      System.out.println(phoChay.shape);
+  }
+}
+
+Output:
+flat
+```
+
+## Parent Class Aspect Modifiers
+
+You may recall that Java class members use `private` and `public` access modifiers to determine whether they can be accessed from outside the class. So does a child class inherit its parent’s `private` members?
+
+Well, no. But there is another access modifier we can use to keep a parent class member accessible to its child `classes` and to `files` in the package it’s contained in — and otherwise private: `protected`.
+
+| Modifier      | Class         | Package     | Child Class   | Global      |
+| ------------- |:-------------:|:-----------:|:-------------:|:-----------:|
+| public        | True          | True        | True          | True        |
+| protected     | True          | True        | True          | False       |
+| no modifier   | True          | True        | False         | False       |
+| private       | True          | False       | False         | False       |
+
+Here’s what `protected` looks like in use:
+
+```java
+class Shape {
+
+  protected double perimeter;
+
+}
+
+// any child class of Shape can access perimeter
+```
+
+In addition to access modifiers, there’s another way to establish how child classes can interact with inherited parent class members: using the `final` keyword. If we add `final` after a parent class method’s access modifier, we disallow any child classes from changing that method. This is helpful in limiting bugs that might occur from modifying a particular method.
+
+Though it is not required, there is an established order when two or more field modifiers are used (eg. `public final`). To learn more about this read the `documentation`.
+
+```java
+Noodle.java
+public class Noodle {
+  private double lengthInCentimeters;
+  private double widthInCentimeters;
+  private String shape;
+  protected String ingredients;
+  protected String texture = "brittle";
+  
+  Noodle(double lenInCent, double wthInCent, String shp, String ingr) {
+    this.lengthInCentimeters = lenInCent;
+    this.widthInCentimeters = wthInCent;
+    this.shape = shp;
+    this.ingredients = ingr;
+  }
+  
+  //es como el private no se puede acceder ni desde class childs
+  public final boolean isTasty() {
+    return true;
+  }
+}
+
+Ramen.java
+public class Ramen extends Noodle {
+
+  Ramen() {
+    super(30.0, 0.3, "flat", "wheat flour");  
+  }
+
+  // public boolean isTasty(){
+  //   return false;
+  // }
+  
+}
+
+Main.java
+public class Main{
+  public static void main(String[] args) {
+    Ramen yasaiRamen = new Ramen();
+    //System.out.println(yasaiRamen.ingredients);
+    // System.out.println(yasaiRamen.isTasty());  
+  }
+}
+```
+
+## Introducing Polymorphism
+
+In Java, if `Orange` is a `Fruit` through `inheritance`, you can then use `Orange` in the same contexts as `Fruit` like this:
+
+```java
+String makeJuice(Fruit fruit) {
+
+  return "Apple juice and " + fruit.squeeze();
+
+}
+
+// inside main()
+Orange orange = new Orange();
+System.out.println(juicer.makeJuice(orange));
+```
+
+Wait, how does that work?
+
+This is because Java incorporates the object-oriented programming principle of polymorphism. Polymorphism, which derives from Greek meaning “many forms”, allows a child class to share the information and behavior of its parent class while also incorporating its own functionality.
+
+The main advantages of polymorphic programming:
+
+* Simplifying syntax
+* Reducing cognitive overload for developers
+
+These benefits are particularly helpful when we want to develop our own Java packages for other developers to import and use.
+
+For example, the built-in operator `+` can be used for both `double`s and `int`s. To the computer, the `+` means something like `addDouble()` for one and `addInt()` for the other, but the creators of Java (and of other languages) didn’t want to burden us as developers with recalling each individual method.
+
+Note that the reverse situation is not true; you cannot use a generic parent class instance where a child class instance is required. So an `Orange` can be used as a `Fruit`, but a Fruit cannot be used as an `Orange`.
+
+## Method Overriding
+
+One common use of polymorphism with Java `classes` is something we mentioned earlier — overriding parent class `methods` in a child class. Like the `+` operator, we can give a single method slightly different meanings for different classes. This is useful when we want our child class method to have the same name as a parent class method but behave a bit differently in some way.
+
+Let’s say we have a `BankAccount` class that allows us to print the current balance. We want to build a `CheckingAccount` class that inherits the functionality of a `BankAccount` but with a modified `printBalance()` method. We can do the following:
+
+```java
+class BankAccount {
+  protected double balance;
+
+  public BankAccount(double balanceIn){
+    balance = balanceIn;
+  }
+
+  public void printBalance() {
+    System.out.println("Your account balance is $" + balance);
+  }
+}
+
+class CheckingAccount extends BankAccount {
+  
+  public CheckingAccount(double balance) {
+    super(balance);
+  }
+
+  @Override
+  public void printBalance() {
+    System.out.println("Your checking account balance is $" + balance);
+  }
+}
+```
+
+Notice that in order to properly override `printBalance()`, in `CheckingAccount` the method has the following in common with the corresponding method in `BankAccount`:
+
+* Method name
+* Return type
+* Number and type of parameters
+
+You may have also noticed the `@Override` keyword above `printBalance()` in `CheckingAccount`. This annotation informs the `compiler` that we want to override a method in the parent class. If the method doesn’t exist in the parent class, we’ll get a helpful error when we compile the program.
+
+__Keep Reading: AP Computer Science A Students__
+
+In a previous exercise, we learned that the `super` keyword can be used to call the constructor of a superclass. That’s not the only use of `super`; we can also use this keyword to call the methods of a parent class. While we now have the ability to override methods from a superclass, we may find ourselves in a unique situation where we want to use the superclass method instead of the subclass’ overridden method.
+
+If that’s the case, we can call the parent class method by prepending `super` followed by the dot operator (`.`) to the method call. Note that this only works if we pass in the proper method parameters. Let’s see this in action by adding a `checkBalances()` method to `CheckingAccount` that calls both versions of `printBalance()`:
+
+```java
+class CheckingAccount extends BankAccount {
+  public CheckingAccount(double balance) {
+    super(balance);
+  }
+
+  @Override
+  public void printBalance() {
+    System.out.println("Your checking account balance is $" + balance);
+  }
+
+  public void checkBalances() {
+    // calls method from CheckingAccount
+    printBalance();
+    // calls method from BankAccount
+    super.printBalance();
+  }
+
+  public static void main(String[] args) {
+    CheckingAccount myCheckings = new CheckingAccount(5000);
+    myCheckings.checkBalances();
+  }
+}
+```
+
+This program will output:
+```terminal 
+Your checking account balance is $5000
+Your account balance is $5000
+```
+
+Example:
+```java
+Noodle.java
+class Noodle {
+  protected double lengthInCentimeters;
+  protected double widthInCentimeters;
+  protected String shape;
+  protected String ingredients;
+  protected String texture = "brittle";
+  
+  Noodle(double lenInCent, double wthInCent, String shp, String ingr) {
+    
+    this.lengthInCentimeters = lenInCent;
+    this.widthInCentimeters = wthInCent;
+    this.shape = shp;
+    this.ingredients = ingr;
+    
+  }
+  
+  public void cook() {
+    System.out.println("Boiling.");
+    this.texture = "cooked";
+  }
+
+}
+
+Spaetzle.java
+class Spaetzle extends Noodle {
+
+    Spaetzle() {
+      super(3.0, 1.5, "irregular", "eggs, flour, salt");
+      this.texture = "lumpy and liquid";     
+    }
+
+    // Add the new cook() method below: 
+    @Override
+    public void cook() {
+        System.out.println("Grinding or scraping the dough into the pot of boiling water.");
+        this.texture = "cooked";
+        System.out.println("Boiling");
+    }
+
+}
+
+Main.java
+public class Main{
+  public static void main(String[] args) {
+    Spaetzle kaesespaetzle = new Spaetzle();
+    kaesespaetzle.cook();
+  }
+}
+
+Output:
+Grinding or scraping the dough into the pot of boiling water.
+Boiling
+```
+
+## Using a Child Class as its Parent Class
+
+An important facet of polymorphism is the ability to use a child class object where an object of its parent class is expected.
+
+One way to do this explicitly is to instantiate a child class object as a member of the parent class. We can instantiate a `CheckingAccount` object as a `BankAccount` like this:
+
+```java
+BankAccount kaylasAccount = new CheckingAccount(600.00);
+```
+
+We can use `kaylasAccount` as if it were an instance of `BankAccount`, in any situation where a `BankAccount` object would be expected. (This would be true even if `kaylasAccount` were instantiated as a `CheckingAccount`, but using the explicit child as parent syntax is most helpful when we want to declare objects in bulk.)
+
+It is important to note here that the `compiler` just considers `kaylasAccount` to be any old `BankAccount`. But because method overriding is handled at runtime, if we call `printBalance()`, we’ll see something `CheckingAccount` specific:
+
+```terminal
+Your checking account balance is $600.00
+```
+
+This is because at runtime, `kaylasAccount` is recognized as the `CheckingAccount` it is. So, what if `CheckingAccount` has a method `transferToSavings()` that `BankAccount` does not have? Can `kaylasAccount` still use that method?
+
+Well, no. The compiler believes that `kaylasAccount` is just a `BankAccount` that doesn’t have some fancy child class `transferToSavings()` method, so it would throw an error.
+
+```java
+Noodle.java
+class Noodle {
+
+  protected double lengthInCentimeters;
+  protected double widthInCentimeters;
+  protected String shape;
+  protected String ingredients;
+  protected String texture = "brittle";
+  
+  Noodle(double lenInCent, double wthInCent, String shp, String ingr) {
+    
+    this.lengthInCentimeters = lenInCent;
+    this.widthInCentimeters = wthInCent;
+    this.shape = shp;
+    this.ingredients = ingr;
+    
+  }
+  
+  public void cook() {
+    this.texture = "cooked";
+  }
+}
+
+Dinner.java
+class Dinner {
+  public void makeNoodles(Noodle noodle, String sauce) {
+    noodle.cook();
+    System.out.println("Mixing " + noodle.texture + " noodles made from " + noodle.ingredients + " with " + sauce + ".");
+    System.out.println("Dinner is served!");
+  }  
+}
+
+BiangBiang.java
+class BiangBiang extends Noodle {
+    BiangBiang() { 
+      super(50.0, 5.0, "flat", "high-gluten flour, salt, water"); 
+    }
+}
+
+Main.java
+public class Main{
+  public static void main(String[] args) {
+    Dinner noodlesDinner = new Dinner();
+    // Add your code here: 
+    Noodle biangBiang = new BiangBiang();
+    noodlesDinner.makeNoodles(biangBiang, "soy sauce and chili oil");
+  }
+}
+
+Output:
+Mixing cooked noodles made from high-gluten flour, salt, water with soy sauce and chili oil.
+Dinner is served!
+```
+
+## Child Classes in Arrays and ArrayLists
+
+Usually, when we create an array or an `ArrayList`, the list items all need to be the same type. But polymorphism puts a new spin on what is considered the same type…
+
+In fact, we can put instances of different `classes` that share a parent class together in an array or `ArrayList`! For example, let’s say we have a `Monster` parent class with a few child classes: `Vampire`, `Werewolf`, and `Zombie`. We can set up an array with instances of each:
+
+```java
+Monster dracula, wolfman, zombie1;
+
+dracula = new Vampire();
+wolfman = new Werewolf();
+zombie1 = new Zombie();
+
+Monster[] monsters = {dracula, wolfman, zombie1};
+```
+
+We can even iterate through the list of items — regardless of subclass — and perform the same action with each item:
+
+```java
+for (Monster monster : monsters) {
+
+  monster.attack();
+
+}
+```
+
+In the code above, we were able to call `attack()` on each monster in `monsters` despite the fact that, in the for-each loop, `monster` is declared as the parent class type `Monster`.
+
+Example:
+```java
+Noodle.java
+class Noodle {
+
+  protected double lengthInCentimeters;
+  protected double widthInCentimeters;
+  protected String shape;
+  protected String ingredients;
+  protected String texture = "brittle";
+  
+  Noodle(double lenInCent, double wthInCent, String shp, String ingr) {
+    
+    this.lengthInCentimeters = lenInCent;
+    this.widthInCentimeters = wthInCent;
+    this.shape = shp;
+    this.ingredients = ingr;
+    
+  }
+  
+  public String getCookPrep() {
+    return "Boil noodle for 7 minutes and add sauce.";
+  }
+}
+
+Spaghetti.java
+class Spaghetti extends Noodle {
+
+  Spaghetti() {
+      super(30.0, 0.2, "round", "semolina flour");
+  }
+  
+  @Override
+  public String getCookPrep() {
+    return "Boil spaghetti for 8 - 12 minutes and add sauce, cheese, or oil and garlic.";
+  }
+}
+
+Ramen.java
+class Ramen extends Noodle {
+
+  Ramen() {
+    super(30.0, 0.3, "flat", "wheat flour");
+  }
+  
+  @Override
+  public String getCookPrep() {
+    return "Boil ramen for 5 minutes in broth, then add meat, mushrooms, egg, and vegetables.";
+  }
+}
+
+Pho.java
+class Pho extends Noodle {
+
+  Pho() {
+    super(30.0, 0.64, "flat", "rice flour");
+  }
+  
+  @Override
+  public String getCookPrep() {
+    return "Soak pho for 1 hour, then boil for 1 minute in broth. Then garnish with cilantro and jalapeno.";
+  }
+}
+
+Main.java
+public class Main {
+  public static void main(String[] args) {
+
+    Noodle spaghetti, ramen, pho;
+    
+    spaghetti = new Spaghetti();
+    ramen = new Ramen();
+    pho = new Pho();
+        
+    // Add your code below:
+    Noodle[] allTheNoodles = {spaghetti, ramen, pho};
+    for( Noodle noodle : allTheNoodles ) {
+      System.out.println(noodle.getCookPrep());
+    }
+       
+  }
+}
+```
+
+Output:
+```terminal
+Hervir los espaguetis durante 8 a 12 minutos y agregar salsa, queso o aceite y ajo.
+Hervir el ramen durante 5 minutos en caldo, luego agregar la carne, los champiñones, el huevo y las verduras.
+Remojar el pho durante 1 hora y luego hervir durante 1 minuto en caldo. Luego decorar con cilantro y jalapeño.
+```
+
+## Child Classes in Method Parameters
+
+When we call a method that contains parameters, the arguments we place in our method call must match the parameter type. Similar to the previous exercise, polymorphism gives us a little more flexibility with the arguments we can use.
+
+If we use a superclass reference as a method parameter, we can call the method using subclass reference arguments!
+
+For example, imagine the class ScaryStory, whose constructor takes in a reference to the Monster class:
+
+```java
+class ScaryStory {
+  Monster monster;
+  String setting;
+
+  public ScaryStory(Monster antagonist, String place) {
+    monster = antagonist;
+    setting = place;
+  }
+
+  public void tellStory(){
+    System.out.println("Once upon a time, " + monster.name + " was at " + setting + " looking to scare some mortals.");
+  }
+
+  public static void main(String[] args) {
+    Monster dracula;
+    dracula = new Vampire("Dracula");
+    ScaryStory countDracula = new ScaryStory(dracula, "Dracula Castle");
+    countDracula.tellStory();
+  }
+}
+```
+
+In the main() method, we used a reference of the class Vampire as our argument even though the constructor requested an object of class Monster. This is allowed because Vampire is a subclass of the Monster class.
