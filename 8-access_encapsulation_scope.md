@@ -64,3 +64,410 @@ While those are valid points, sometimes restricting our code is actually useful 
 For example, a `Bank` object doesn’t necessarily need to know the inner workings of a `CheckingAccount` object. It doesn’t need to know that the money is stored in a field named `money`, or that interest is added to an account by using a method named `.addInterest()`. In fact, if it had access to those fields or methods, it’s possible that someone using a `Bank` object could change things in a `CheckingAccount` without realizing it. By limiting access by using the `private` keyword, we are able to segment, or encapsulate, our code into individual units.
 
 Note that we don’t necessarily want to completely block everything from other classes. In the next exercise, we’ll get into when you might want to make methods public — we’ll take a look at getter and setter methods.
+
+## Accessor and Mutator Methods
+
+When writing `classes`, we often make all of our instance `variables private`. However, we still might want some other classes to have access to them, we just don’t want those classes to know the exact variable name. To give other classes access to a private instance variable, we would write an accessor method (sometimes also known as a “getter” method).
+
+```java
+public class Dog{
+  private String name;
+    
+  //Other methods and constructors
+
+  public String getName() {
+    return name;
+  }
+}
+```
+
+Even though the instance variable `name` is `private`, other classes could call the `public` method `getName()` which returns the value of that instance variable. Accessor `methods` will always be `public`, and will have a return type that matches the type of the instance variable they’re accessing.
+
+Similarly, `private` instance variables often have mutator methods (sometimes known as “setters”). These methods allow other classes to reset the value stored in `private` instance variables.
+
+```java
+public class Dog{
+  private String name;
+    
+  //Other methods and constructors
+
+  public void setName(String newName) {
+    name = newName;
+  }
+
+  public static void main(String[] args){
+    Dog myDog = new Dog("Cujo");
+    myDog.setName("Lassie");
+  }
+}
+```
+
+Mutator methods, or “setters”, often are `void` methods — they don’t return anything, they just reset the value of an existing variable. Similarly, they often have one parameter that is the same type as the variable they’re trying to change.
+
+Example:
+```java
+Bank.java
+public class Bank{
+  public static void main(String[] args){
+    CheckingAccount accountOne = new CheckingAccount("Zeus", 100, "1");
+    CheckingAccount accountTwo = new CheckingAccount("Hades", 200, "2");
+    System.out.println(accountOne.getBalance());
+    accountOne.setBalance(5000);
+    System.out.println(accountOne.getBalance());
+  }
+}
+
+CheckingAccount.java
+public class CheckingAccount{
+  public String name;
+  private int balance;
+  private String id;
+  
+  public CheckingAccount(String inputName, int inputBalance, String inputId){
+    name = inputName;
+    balance = inputBalance;
+    id = inputId;
+  }  
+
+  public int getBalance() {
+    return balance;
+  }
+
+  public void setBalance(int newBalance) {
+    balance = newBalance;
+  }
+
+}
+
+Output:
+100
+5000
+```
+
+## Scope: Local Variables
+
+In addition to access modifiers like `public` and `private`, the scope of the variable also determines what parts of your code can access that variable.
+
+The scope of a variable is determined by where the variable is declared. For example, because instance `variables` are declared inside a class but outside any `methods` or `connstructors`, all methods and constructors are within the scope of that variable. For example, in the code block below, constructors and methods of the `Dog` class are using the `Dog` instance variables like name and age:
+
+```java
+class Dog{
+  public String name;
+  public int age;
+  public int weight;
+
+  public Dog(){
+    name = "Winston";
+    age = 8;
+    weight = 30;
+  }
+
+  public void speak(){
+    System.out.println("My name is " + name);
+  }
+}
+```
+
+However, if we have a variable declared inside a method, that variable can only be used inside that method. The same is true for parameters. The scope of those parameters is only the method they’re associated with. If you try to use a parameter outside the function it’s defined in, you’ll get an error. These variables are often called local variables. Note that we don’t use `public` or `private` when declaring local variables.
+
+This idea of scope extends to `conditionals` and `loops` as well. If you declare a variable inside the body of a conditional or in a loop, that variable can only be used inside that structure. This also includes the variable you’re using as your looping variable. For example, consider the following block of code:
+
+```java
+for(int i = 0; i < 10; i++){
+  // You can use i here
+}
+// i is out of scope here
+```
+
+You can only use `i` between the curly braces of the for loop. In general, whenever you see curly braces, be aware of scope. If a variable is defined inside curly braces, and you try to use that variable outside of those curly braces, you will likely see an error!
+
+## Scope: The this Keyword
+
+Often times when creating `classes`, programmers will create local `variables` with the same name as instance variables. For example, consider the code block below:
+
+```java
+public class Dog{
+  public String name;
+
+  public Dog(String inputName){
+    name = inputName;
+  }
+
+  public void speakNewName(String name){
+    System.out.println("Hello, my new name is" + name);
+  }
+
+  public static void main(String[] args){
+    Dog myDog = new Dog("Winston");
+    myDog.speakNewName("Darla"); // Prints "Darla" - "Winston" ignored
+
+  }
+}
+```
+
+We have an instance variable named `name`, but the method `speakNewName` has a parameter named `name`. So when the method tries to print `name`, which variable will be printed? By default, Java refers to the local variable name. So in this case, the value passed to the parameter will be printed and not the instance variable.
+
+If we wanted to access the instance variable and not the local variable, we could use the `this` keyword.
+
+```java
+public class Dog{
+  public String name;
+
+  public Dog(String inputName){
+    name = inputName;
+  }
+
+  public void speakNewName(String name){
+    System.out.println("Hello, my new name is" + this.name);
+  }
+    
+  public static void main(String[] args){
+    Dog a = new Dog("Fido");
+    Dog b = new Dog("Odie");
+
+    a.speakNewName("Winston");
+    // "Fido", the instance variable of Dog a is printed. "Winston" is ignored
+
+    b.speakNewName("Darla");
+    // "Odie", the instance variable of Dog b is printed. "Darla" is ignored.
+  }
+}
+```
+
+The `this` keyword is a reference to the current object. We used `this.name` in our `speakNewName()` method. This caused the method to print out the value stored in the instance variable `name` of whatever `Dog` Object called `speakNewName()`. (Note that in this somewhat contrived example, the local variable `name` used as a parameter gets completely ignored).
+
+Oftentimes, you’ll see `constructors` have parameters with the same name as the instance variable. For example, you might see something like:
+
+```java
+public Dog(String name){
+  this.name = name;
+}
+```
+
+You can read this as “set `this Dog`‘s instance variable `name` equal to the variable passed into the constructor”. While this naming is a common convention, it can also be confusing. There’s nothing wrong with naming your parameters something else to be more clear. Sometimes you will see something like:
+
+```java
+public Dog(String inputName){
+  this.name = inputName;
+}
+```
+
+This is now a little clearer — we’re setting the `Dog‘s` instance variable `name` equal to the name we give the constructor.
+
+Finally, mutator `methods` also usually follow this pattern:
+
+```java
+public void setName(String name){
+  this.name = name;
+}
+```
+
+We reset the instance variable to the value passed into the parameter.
+
+Throughout the rest of this lesson, we’ll use `this`. when referring to an instance variable. This isn’t always explicitly necessary — if there’s no local variable with the same name, Java will know to use the instance variable with that name. That being said, it is a good habit to use `this`. when working with your instance variables to avoid potential confusion.
+
+```java
+SavingsAccount.java
+public class SavingsAccount{
+
+  public String owner;
+  public double balanceDollar;
+  public double balanceEuro;
+
+  public SavingsAccount(String owner, double balanceDollar){
+    // Complete the constructor
+    this.owner = owner;
+    this.balanceDollar = balanceDollar;
+    this.balanceEuro = balanceDollar * 0.85;
+  }
+
+  public void addMoney(int balanceDollar){
+    // Complete this method
+    this.balanceDollar += balanceDollar;
+    System.out.println("Adding "+balanceDollar+" dollars to the account.");
+    System.out.println("The new balance is "+this.balanceDollar+" dollars.");
+  }
+
+}
+
+Main.java
+public class Main{
+  public static void main(String[] args){
+    SavingsAccount zeusSavingsAccount = new SavingsAccount("Zeus", 1000);
+
+    // Make a call to addMoney() to test your method
+    zeusSavingsAccount.addMoney(2000);
+  }
+}
+
+Output:
+Adding 2000 dollars to the account.
+The new balance is 3000.0 dollars.
+```
+
+## Using this With Methods
+
+We’ve seen how the `this` works with `variables`, but we can also use the `this` with `methods`.
+
+Recall how we’ve been calling methods up to this point:
+
+```java
+public static void main(String[] args){
+  Dog myDog = new Dog("Odie");
+  myDog.speak();
+}
+```
+
+Here we’re creating an instance of a `Dog` and using that `Dog` to call the `speak()` method. However, when defining methods, we can also use the `this` keyword to call other methods. Consider the code block below:
+
+```java
+public class Computer{
+  public int brightness;
+  public int volume;
+  
+  public void setBrightness(int inputBrightness){
+    this.brightness = inputBrightness;
+  }
+
+  public void setVolume(int inputVolume){
+    this.volume = inputVolume;
+  }
+
+  public void resetSettings(){
+    this.setBrightness(0);
+    this.setVolume(0);
+  }
+}
+```
+
+Take a look at the `resetSettings()` method in particular. This method calls other methods from the class. But it needs an object to call those methods! Rather than create a new object (like we did with the `Dog` named `myDog` earlier), we use `this` as the object. What this means is that the object that calls `resetSettings()` will be used to call `setBrightness(0)` and `setVolume(0)`.
+
+```java
+public static void main(String[] args){
+  Computer myComputer = new Computer();
+  myComputer.resetSettings();
+}
+```
+
+In this example, calling `myComputer.resetSettings()` is as if we called `myComputer.setBrightness(0)` and `myComputer.setVolume(0).` `this` serves as a placeholder for whatever object was used to call the original method.
+
+__Keep Reading: AP Computer Science A Students__
+
+Finally, `this` can be used as a value for a parameter. Let’s say a method exists that takes a `Computer` as a parameter (that method’s signature might be something like `public` `void pairWithOtherComputer(Computer other)`). If you’re writing another method in `Computer`, and want to call the `pairWithOtherComputer()` method, you could use `this` as the parameter. That call might look something like `this.pairWithOtherComputer(this)`. You’re using the current object to call the method and are passing that object as that method’s parameter.
+
+```java
+public void pairWithOtherComputer(Computer other){
+  // Code for method that uses the parameter other
+}
+
+public void setUpConnection(){
+  // We use "this" to call the method and also pass "this" to the method so it can be used in that method
+  this.pairWithOtherComputer(this);
+}
+```
+
+Example:
+
+```java
+Person.java
+public class Person{
+  public int age;
+  public int wisdom;
+  public int fitness;
+
+  public Person(int inputAge){
+    this.age = inputAge;
+    this.wisdom = inputAge * 5;
+    this.fitness = 100 - inputAge;
+  }
+
+  public void setAge(int newAge){
+    this.age = newAge;
+  }
+
+  public void setWisdom(int newWisdom){
+    this.wisdom = newWisdom;
+  }
+
+  public void setFitness(int newFitness){
+    this.fitness = newFitness;
+  }
+
+  public void hasBirthday(){
+    //Complete this method
+    this.setAge(this.age + 1);
+    this.setWisdom(this.wisdom + 5);
+    this.setFitness(this.fitness - 3);
+  }
+}
+
+Main.java
+public class Main{
+  public static void main(String[] args){
+    Person emily = new Person(20);
+    emily.hasBirthday();
+    System.out.println("New age is: " + emily.age);
+    System.out.println("New wisdom is: " + emily.wisdom);
+    System.out.println("New fitness is: " + emily.fitness);
+  }
+}
+
+Output:
+New age is: 21
+New wisdom is: 105
+New fitness is: 77
+```
+
+## Other Private Methods
+
+Now that we’ve seen how `methods` can call other methods using `this.`, let’s look at a situation where you might want to use `private` methods. Oftentimes, `private` methods are helper methods — that is to say that they’re methods that other, bigger methods use.
+
+For example, for our `CheckingAccount` example, we might want a public method like `getAccountInformation()` that prints information like the name of the account owner, the amount of money in the account, and the amount of interest the account will make in a month. That way, another class, like a `Bank`, could call that public method to get all of that information quickly.
+
+Well, in order to get that information, we might want to break that larger method into several helper methods. For example, inside `getAccountInformation()`, we might want to call a function called `calculateNextMonthInterest()`. That helper method should probably be `private`. There’s no need for a `Bank` to call these smaller helper methods — instead, a `Bank` can call the one `public` method, and rely on that method to do all of the complicated work by calling smaller `private` methods.
+
+Example:
+```java
+CheckingAccount.java
+public class CheckingAccount{
+  
+  private String name;
+  private int balance;
+  private String id;
+  private double interestRate;
+  
+  public CheckingAccount(String inputName, int inputBalance, String inputId){
+    this.name = inputName;
+    this.balance = inputBalance;
+    this.id = inputId;
+    this.interestRate = 0.02;
+  }
+
+  private double calculateNextMonthInterest() {
+    double nextMonthInterest = this.balance * interestRate;
+    return nextMonthInterest;
+  }
+  
+  public void getAccountInformation(){
+    System.out.println("Money in account: " + this.getBalance());
+    System.out.println("Next Month's Interest: " + this.calculateNextMonthInterest());
+  }
+  
+  private int getBalance(){
+    return this.balance;
+  }
+  
+}
+
+Bank.java
+public class Bank{ 
+  public static void main(String[] args){
+    CheckingAccount accountOne = new CheckingAccount("Zeus", 100, "1");
+    accountOne.getAccountInformation();
+  }
+}
+
+Output:
+Money in account: 100
+Next Month's Interest: 2.0
+```
