@@ -583,7 +583,7 @@ When we call a method that contains parameters, the arguments we place in our me
 
 If we use a superclass reference as a method parameter, we can call the method using subclass reference arguments!
 
-For example, imagine the class ScaryStory, whose constructor takes in a reference to the Monster class:
+For example, imagine the class `ScaryStory`, whose constructor takes in a reference to the `Monster` class:
 
 ```java
 class ScaryStory {
@@ -608,4 +608,99 @@ class ScaryStory {
 }
 ```
 
-In the main() method, we used a reference of the class Vampire as our argument even though the constructor requested an object of class Monster. This is allowed because Vampire is a subclass of the Monster class.
+In the `main()` method, we used a reference of the class `Vampire` as our argument even though the constructor requested an object of class `Monster`. This is allowed because `Vampire` is a subclass of the `Monster` class.
+
+Example:
+
+Look at the new file called Main.java. There is an instance of `NoodleRestaurant` called `customer1`. The class `NoodleRestaurant` has a method called `order()` that takes in an object of type `Noodle` as a parameter.
+
+We instantiated `Ramen` and `Pho` as `Noodle` in the `main()` method.
+
+Inside the `main()` method, call the `order()` method of the `customer1` instance and pass in the `pho` instance as an argument.
+```java
+public class Main{
+  public static void main(String[] args) {
+    Noodle ramen, pho;
+    ramen = new Ramen();
+    pho = new Pho();
+      
+    NoodleRestaurant customer1 = new NoodleRestaurant("Sagirah");
+  
+    // Add your code here
+    customer1.order(pho);
+
+  }
+}
+```
+
+Output:
+```terminal
+Soak pho for 1 hour, then boil for 1 minute in broth. Then garnish with cilantro and jalapeno.
+Order for Sagirah is ready.
+```
+
+Example Final:
+```java
+Language.java
+public class Language {
+  
+  protected String name;
+  protected int numSpeakers;
+  protected String regionsSpoken;
+  protected String wordOrder;
+
+  Language(String userName, int numSpeaker, String regionSpoken, String worsOrder) {
+    this.name = userName;
+    this.numSpeakers = numSpeaker;
+    this.regionsSpoken = regionSpoken;
+    this.wordOrder = worsOrder;
+  }
+
+  public void getInfo() {
+    System.out.println(this.name+" is spoken by "+this.numSpeakers+" people mainly in "+this.regionsSpoken+".");
+    System.out.println("The lenguage follows the word order: "+this.wordOrder);
+  }
+
+  public static void main(String[] args) {
+    SinoTibetan mandarin = new SinoTibetan("Mandarin Chinese", 1110000000);
+    mandarin.getInfo();
+    SinoTibetan burmese = new SinoTibetan("Burmese", 43000000);
+    burmese.getInfo();
+
+  } 
+}
+
+Mayan.java
+class Mayan extends Language {
+  
+  Mayan(String languageName, int numSpeakers) {
+    super(languageName, numSpeakers, "Central America", "verb-object-subject");
+  }
+
+  @Override
+  public void getInfo() {
+    System.out.println(this.name + " is spoken by " + this.numSpeakers + " people mainly in " + this.regionsSpoken + ".");
+    System.out.println("The language follows the word order: " + this.wordOrder);
+    System.out.println("Fun fact: " + this.name + " is an ergative language.");
+  }
+  
+}
+
+SinoTibetan.java
+class SinoTibetan extends Language {
+  
+  SinoTibetan(String nameLenguage, int numSpeakers) {
+    super(nameLenguage, numSpeakers, "Asia", "subject-object-verb");
+    if( nameLenguage.contains("Chinese") ) {
+      this.wordOrder = "subject-verb-object";
+    }
+  }
+
+}
+```
+
+Output:
+```terminal
+Mandarin Chinese is spoken by 1110000000 people mainly in Asia. The Lenguage follows the word order: subject-verb-object.
+Burmese is spoken by 43000000 people mainly in Asia. The Lenguage follows the word order: subject-object-verb.
+```
